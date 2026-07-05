@@ -1,1 +1,901 @@
-# STUDY-CT25TC33-4
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icedrive - Cloud Storage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6C3CE1; --primary-dark: #5A2DC5; --primary-light: #8B5CF6;
+            --accent: #00D4AA; --accent-dark: #00B894;
+            --dark: #0D0B1A; --dark-light: #1A1730;
+            --gray-900: #1C1935; --gray-800: #2D2A4A; --gray-700: #3D3A5A;
+            --gray-600: #6B6888; --gray-400: #9B98B0; --gray-300: #C5C3D3;
+            --gray-200: #E2E0EB; --gray-100: #F3F2F7; --white: #FFFFFF;
+            --gradient-primary: linear-gradient(135deg, #6C3CE1 0%, #8B5CF6 50%, #A78BFA 100%);
+            --gradient-hero: linear-gradient(180deg, #0D0B1A 0%, #1A1730 50%, #2D2A4A 100%);
+            --gradient-accent: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.2);
+            --shadow-glow: 0 0 60px rgba(108, 60, 225, 0.3);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--dark); color: var(--gray-300);
+            line-height: 1.6; overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 16px 0; transition: all 0.3s ease;
+            background: rgba(13, 11, 26, 0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(108, 60, 225, 0.1);
+        }
+        .navbar.scrolled { padding: 10px 0; background: rgba(13, 11, 26, 0.95); border-bottom: 1px solid rgba(108, 60, 225, 0.2); }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .navbar-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; color: var(--white); }
+        .navbar-logo .logo-icon { width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .navbar-logo span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .navbar-menu { display: flex; align-items: center; gap: 32px; }
+        .navbar-menu a { color: var(--gray-400); font-size: 14px; font-weight: 500; position: relative; padding: 4px 0; }
+        .navbar-menu a:hover { color: var(--white); }
+        .navbar-menu a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--gradient-primary); transition: width 0.3s ease; border-radius: 1px; }
+        .navbar-menu a:hover::after { width: 100%; }
+        .navbar-actions { display: flex; align-items: center; gap: 16px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.3s ease; font-family: inherit; white-space: nowrap;
+        }
+        .btn-ghost { background: transparent; color: var(--gray-300); }
+        .btn-ghost:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+        .btn-primary { background: var(--gradient-primary); color: var(--white); box-shadow: 0 4px 15px rgba(108, 60, 225, 0.4); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(108, 60, 225, 0.5); }
+        .btn-outline { background: transparent; color: var(--white); border: 1px solid rgba(108, 60, 225, 0.5); }
+        .btn-outline:hover { background: rgba(108, 60, 225, 0.1); border-color: var(--primary); }
+        .btn-xl { padding: 18px 48px; font-size: 17px; border-radius: 14px; }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 5px; }
+        .hamburger span { width: 24px; height: 2px; background: var(--white); border-radius: 2px; transition: all 0.3s ease; }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative; min-height: 100vh; display: flex; align-items: center;
+            padding: 120px 0 80px; background: var(--gradient-hero); overflow: hidden;
+        }
+        .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px; background: radial-gradient(circle, rgba(108, 60, 225, 0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .hero::after { content: ''; position: absolute; bottom: -30%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 212, 170, 0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+        .hero-content { max-width: 580px; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(108, 60, 225, 0.15); border: 1px solid rgba(108, 60, 225, 0.3); border-radius: 50px; font-size: 13px; font-weight: 500; color: var(--primary-light); margin-bottom: 24px; }
+        .hero-badge .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .hero h1 { font-size: 56px; font-weight: 800; line-height: 1.1; color: var(--white); margin-bottom: 20px; letter-spacing: -1.5px; }
+        .hero h1 .highlight { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero h1 .highlight-accent { background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-description { font-size: 18px; color: var(--gray-400); margin-bottom: 36px; line-height: 1.7; max-width: 480px; }
+        .hero-actions { display: flex; align-items: center; gap: 16px; margin-bottom: 48px; flex-wrap: wrap; }
+        .hero-stats { display: flex; gap: 40px; }
+        .hero-stat .number { font-size: 28px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
+        .hero-stat .number span { color: var(--primary-light); }
+        .hero-stat .label { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
+
+        /* Hero Visual */
+        .hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
+        .hero-mockup { position: relative; width: 100%; max-width: 520px; }
+        .mockup-window { background: var(--dark-light); border-radius: 16px; border: 1px solid rgba(108, 60, 225, 0.2); overflow: hidden; box-shadow: var(--shadow-glow), var(--shadow-lg); }
+        .mockup-header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: rgba(26, 23, 48, 0.8); border-bottom: 1px solid rgba(108, 60, 225, 0.1); }
+        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .mockup-dot.red { background: #FF5F57; } .mockup-dot.yellow { background: #FFBD2E; } .mockup-dot.green { background: #28CA41; }
+        .mockup-title { flex: 1; text-align: center; font-size: 12px; color: var(--gray-600); font-weight: 500; }
+        .mockup-body { padding: 24px; min-height: 340px; }
+        .mockup-sidebar { display: flex; gap: 20px; }
+        .mockup-nav { width: 160px; flex-shrink: 0; }
+        .mockup-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; color: var(--gray-400); margin-bottom: 4px; cursor: pointer; transition: all 0.2s ease; }
+        .mockup-nav-item:hover, .mockup-nav-item.active { background: rgba(108, 60, 225, 0.15); color: var(--white); }
+        .mockup-nav-item.active { background: rgba(108, 60, 225, 0.2); }
+        .mockup-nav-item .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .mockup-content { flex: 1; }
+        .mockup-content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .mockup-content-title { font-size: 15px; font-weight: 600; color: var(--white); }
+        .mockup-upload-btn { padding: 6px 14px; background: var(--gradient-primary); border-radius: 6px; font-size: 11px; font-weight: 600; color: var(--white); cursor: pointer; }
+        .mockup-file-list { display: flex; flex-direction: column; gap: 8px; }
+        .mockup-file { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(45, 42, 74, 0.5); border-radius: 8px; border: 1px solid rgba(108, 60, 225, 0.08); }
+        .file-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .file-icon.purple { background: rgba(108, 60, 225, 0.2); } .file-icon.blue { background: rgba(59, 130, 246, 0.2); }
+        .file-icon.green { background: rgba(0, 212, 170, 0.2); } .file-icon.orange { background: rgba(251, 146, 60, 0.2); }
+        .file-icon.pink { background: rgba(236, 72, 153, 0.2); }
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-size: 12px; font-weight: 500; color: var(--gray-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta { font-size: 10px; color: var(--gray-600); margin-top: 2px; }
+        .file-size { font-size: 11px; color: var(--gray-600); flex-shrink: 0; }
+
+        .floating-card { position: absolute; background: var(--dark-light); border: 1px solid rgba(108, 60, 225, 0.2); border-radius: 12px; padding: 14px 18px; box-shadow: var(--shadow-lg); animation: float 6s ease-in-out infinite; z-index: 2; }
+        .floating-card-1 { top: 10%; right: -30px; }
+        .floating-card-2 { bottom: 15%; left: -20px; animation-delay: 2s; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        .floating-card .fc-icon { font-size: 20px; margin-bottom: 6px; }
+        .floating-card .fc-text { font-size: 11px; font-weight: 600; color: var(--white); }
+        .floating-card .fc-sub { font-size: 10px; color: var(--gray-600); }
+
+        /* ===== FEATURES ===== */
+        .features { padding: 120px 0; position: relative; background: var(--dark); }
+        .section-header { text-align: center; max-width: 640px; margin: 0 auto 72px; }
+        .section-label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(108, 60, 225, 0.1); border: 1px solid rgba(108, 60, 225, 0.2); border-radius: 50px; font-size: 13px; font-weight: 600; color: var(--primary-light); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .section-title { font-size: 44px; font-weight: 800; color: var(--white); margin-bottom: 16px; letter-spacing: -1px; line-height: 1.15; }
+        .section-subtitle { font-size: 17px; color: var(--gray-400); line-height: 1.7; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .feature-card { background: linear-gradient(135deg, rgba(26, 23, 48, 0.8) 0%, rgba(45, 42, 74, 0.4) 100%); border: 1px solid rgba(108, 60, 225, 0.1); border-radius: 20px; padding: 36px 30px; transition: all 0.4s ease; position: relative; overflow: hidden; }
+        .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-primary); opacity: 0; transition: opacity 0.4s ease; }
+        .feature-card:hover { transform: translateY(-8px); border-color: rgba(108, 60, 225, 0.3); box-shadow: var(--shadow-glow); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+        .feature-icon.purple { background: rgba(108, 60, 225, 0.15); } .feature-icon.green { background: rgba(0, 212, 170, 0.15); }
+        .feature-icon.blue { background: rgba(59, 130, 246, 0.15); } .feature-icon.orange { background: rgba(251, 146, 60, 0.15); }
+        .feature-icon.pink { background: rgba(236, 72, 153, 0.15); } .feature-icon.cyan { background: rgba(6, 182, 212, 0.15); }
+        .feature-card h3 { font-size: 19px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+        .feature-card p { font-size: 14px; color: var(--gray-400); line-height: 1.7; }
+
+        /* ===== VIDEO PLAYER IN FEATURES ===== */
+        .features-video-container {
+            max-width: 900px;
+            margin: 0 auto 60px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid rgba(108, 60, 225, 0.3);
+            box-shadow: 0 16px 60px rgba(0,0,0,0.5), var(--shadow-glow);
+            background: var(--dark-light);
+            aspect-ratio: 16/9;
+        }
+
+        .features-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ===== SECURITY ===== */
+        .security { padding: 120px 0; background: linear-gradient(180deg, var(--dark) 0%, var(--dark-light) 100%); position: relative; }
+        .security .container { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .security-visual { position: relative; }
+        .security-graphic { width: 100%; max-width: 460px; aspect-ratio: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        .security-circle { position: absolute; border-radius: 50%; border: 1px solid rgba(108, 60, 225, 0.15); }
+        .security-circle-1 { width: 100%; height: 100%; animation: rotate 30s linear infinite; }
+        .security-circle-2 { width: 75%; height: 75%; border-color: rgba(0, 212, 170, 0.15); animation: rotate 25s linear infinite reverse; }
+        .security-circle-3 { width: 50%; height: 50%; animation: rotate 20s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .security-center { position: relative; z-index: 2; width: 120px; height: 120px; background: var(--gradient-primary); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 48px; box-shadow: var(--shadow-glow); }
+        .security-node { position: absolute; width: 50px; height: 50px; background: var(--dark-light); border: 1px solid rgba(108, 60, 225, 0.3); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 2; }
+        .security-node:nth-child(5) { top: 5%; left: 50%; transform: translateX(-50%); }
+        .security-node:nth-child(6) { top: 25%; right: 5%; }
+        .security-node:nth-child(7) { bottom: 25%; right: 5%; }
+        .security-node:nth-child(8) { bottom: 5%; left: 50%; transform: translateX(-50%); }
+        .security-node:nth-child(9) { bottom: 25%; left: 5%; }
+        .security-node:nth-child(10) { top: 25%; left: 5%; }
+        .security-content h2 { font-size: 40px; font-weight: 800; color: var(--white); margin-bottom: 20px; letter-spacing: -1px; line-height: 1.15; }
+        .security-content > p { font-size: 16px; color: var(--gray-400); margin-bottom: 36px; line-height: 1.7; }
+        .security-features { display: flex; flex-direction: column; gap: 20px; }
+        .security-feature { display: flex; gap: 16px; align-items: flex-start; }
+        .security-feature .sf-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(108, 60, 225, 0.12); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .security-feature .sf-text h4 { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+        .security-feature .sf-text p { font-size: 13px; color: var(--gray-400); line-height: 1.6; }
+
+        /* ===== PRICING ===== */
+        .pricing { padding: 120px 0; background: var(--dark); position: relative; }
+        .pricing::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(108, 60, 225, 0.08) 0%, transparent 70%); pointer-events: none; }
+        .pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 56px; }
+        .pricing-toggle span { font-size: 14px; font-weight: 500; color: var(--gray-400); }
+        .pricing-toggle span.active { color: var(--white); }
+        .toggle-switch { width: 52px; height: 28px; background: var(--gray-800); border-radius: 14px; position: relative; cursor: pointer; border: 1px solid rgba(108, 60, 225, 0.3); transition: all 0.3s ease; }
+        .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: var(--gradient-primary); border-radius: 50%; transition: all 0.3s ease; }
+        .toggle-switch.active::after { left: 27px; }
+        .pricing-save { font-size: 12px; font-weight: 600; color: var(--accent); background: rgba(0, 212, 170, 0.1); padding: 4px 10px; border-radius: 20px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative; z-index: 1; }
+        .pricing-card { background: linear-gradient(135deg, rgba(26, 23, 48, 0.9) 0%, rgba(45, 42, 74, 0.5) 100%); border: 1px solid rgba(108, 60, 225, 0.1); border-radius: 20px; padding: 36px 28px; text-align: center; transition: all 0.4s ease; position: relative; }
+        .pricing-card:hover { transform: translateY(-8px); border-color: rgba(108, 60, 225, 0.3); }
+        .pricing-card.popular { border-color: rgba(108, 60, 225, 0.5); background: linear-gradient(135deg, rgba(108, 60, 225, 0.15) 0%, rgba(26, 23, 48, 0.9) 100%); box-shadow: var(--shadow-glow); transform: scale(1.03); }
+        .pricing-card.popular:hover { transform: scale(1.03) translateY(-8px); }
+        .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 20px; background: var(--gradient-primary); border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--white); text-transform: uppercase; letter-spacing: 1px; }
+        .pricing-plan { font-size: 14px; font-weight: 600; color: var(--primary-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .pricing-storage { font-size: 13px; color: var(--gray-400); margin-bottom: 20px; }
+        .pricing-amount { margin-bottom: 8px; }
+        .pricing-amount .currency { font-size: 20px; font-weight: 700; color: var(--white); vertical-align: top; }
+        .pricing-amount .price { font-size: 48px; font-weight: 800; color: var(--white); letter-spacing: -2px; line-height: 1; }
+        .pricing-amount .period { font-size: 14px; color: var(--gray-600); font-weight: 400; }
+        .pricing-annual { font-size: 12px; color: var(--gray-600); margin-bottom: 28px; }
+        .pricing-features { text-align: left; margin-bottom: 28px; }
+        .pricing-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; color: var(--gray-300); }
+        .pricing-features li .check { color: var(--accent); font-size: 14px; flex-shrink: 0; }
+        .pricing-card .btn { width: 100%; }
+
+        /* ===== PLATFORMS / GALLERY ===== */
+        .platforms { padding: 120px 0; background: linear-gradient(180deg, var(--dark) 0%, var(--dark-light) 100%); }
+
+        /* IMAGE SLIDESHOW */
+        .gallery-slideshow {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid rgba(108, 60, 225, 0.3);
+            box-shadow: 0 16px 60px rgba(0,0,0,0.5), var(--shadow-glow);
+            aspect-ratio: 16/10;
+            background: var(--dark-light);
+        }
+
+        .gallery-slideshow .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .gallery-slideshow .slide.active {
+            opacity: 1;
+        }
+
+        .gallery-slideshow .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Slide indicators */
+        .slide-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .slide-indicators .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(108, 60, 225, 0.2);
+        }
+
+        .slide-indicators .indicator.active {
+            background: var(--gradient-primary);
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(108, 60, 225, 0.5);
+        }
+
+        /* Slide arrows */
+        .slide-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(13, 11, 26, 0.7);
+            border: 1px solid rgba(108, 60, 225, 0.3);
+            color: var(--white);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .slide-arrow:hover {
+            background: rgba(108, 60, 225, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slide-arrow.prev { left: 16px; }
+        .slide-arrow.next { right: 16px; }
+
+        /* Slide counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(13, 11, 26, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--white);
+            border: 1px solid rgba(108, 60, 225, 0.2);
+            z-index: 10;
+        }
+
+        /* Platforms grid giữ nguyên */
+        .platforms-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: 60px; }
+        .platform-card { background: linear-gradient(135deg, rgba(26, 23, 48, 0.8) 0%, rgba(45, 42, 74, 0.4) 100%); border: 1px solid rgba(108, 60, 225, 0.1); border-radius: 16px; padding: 32px 20px; text-align: center; transition: all 0.3s ease; }
+        .platform-card:hover { transform: translateY(-6px); border-color: rgba(108, 60, 225, 0.3); box-shadow: 0 0 30px rgba(108, 60, 225, 0.15); }
+        .platform-icon { font-size: 40px; margin-bottom: 16px; }
+        .platform-card h4 { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+        .platform-card p { font-size: 12px; color: var(--gray-600); }
+
+        /* ===== CTA ===== */
+        .cta { padding: 120px 0; background: var(--dark); position: relative; overflow: hidden; }
+        .cta-box { position: relative; background: linear-gradient(135deg, rgba(108, 60, 225, 0.2) 0%, rgba(26, 23, 48, 0.9) 50%, rgba(0, 212, 170, 0.1) 100%); border: 1px solid rgba(108, 60, 225, 0.3); border-radius: 32px; padding: 80px 60px; text-align: center; overflow: hidden; }
+        .cta-box::before { content: ''; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(108, 60, 225, 0.2) 0%, transparent 70%); border-radius: 50%; }
+        .cta-box::after { content: ''; position: absolute; bottom: -100px; left: -100px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(0, 212, 170, 0.1) 0%, transparent 70%); border-radius: 50%; }
+        .cta-box h2 { font-size: 44px; font-weight: 800; color: var(--white); margin-bottom: 16px; letter-spacing: -1px; position: relative; z-index: 1; }
+        .cta-box p { font-size: 18px; color: var(--gray-400); margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; position: relative; z-index: 1; }
+        .cta-actions { display: flex; justify-content: center; gap: 16px; position: relative; z-index: 1; }
+
+        /* ===== FOOTER ===== */
+        .footer { padding: 80px 0 40px; background: var(--dark-light); border-top: 1px solid rgba(108, 60, 225, 0.1); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 60px; }
+        .footer-brand .navbar-logo { margin-bottom: 16px; }
+        .footer-brand p { font-size: 14px; color: var(--gray-600); line-height: 1.7; max-width: 280px; margin-bottom: 20px; }
+        .footer-social { display: flex; gap: 12px; }
+        .footer-social a { width: 36px; height: 36px; border-radius: 10px; background: rgba(108, 60, 225, 0.1); border: 1px solid rgba(108, 60, 225, 0.15); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--gray-400); transition: all 0.3s ease; }
+        .footer-social a:hover { background: rgba(108, 60, 225, 0.2); color: var(--white); transform: translateY(-2px); }
+        .footer-column h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer-column ul li { margin-bottom: 10px; }
+        .footer-column ul li a { font-size: 13px; color: var(--gray-600); }
+        .footer-column ul li a:hover { color: var(--primary-light); }
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid rgba(108, 60, 225, 0.1); }
+        .footer-bottom p { font-size: 13px; color: var(--gray-600); }
+        .footer-bottom-links { display: flex; gap: 24px; }
+        .footer-bottom-links a { font-size: 13px; color: var(--gray-600); }
+        .footer-bottom-links a:hover { color: var(--primary-light); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero .container { grid-template-columns: 1fr; text-align: center; }
+            .hero-content, .hero-description { max-width: 100%; }
+            .hero-actions, .hero-stats { justify-content: center; }
+            .hero-visual { display: none; }
+            .hero h1 { font-size: 44px; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .security .container { grid-template-columns: 1fr; }
+            .security-visual { display: none; }
+            .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+            .platforms-grid { grid-template-columns: repeat(3, 1fr); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .navbar-menu { display: none; }
+            .hamburger { display: flex; }
+            .hero h1 { font-size: 36px; }
+            .section-title { font-size: 32px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+            .pricing-card.popular { transform: none; }
+            .pricing-card.popular:hover { transform: translateY(-8px); }
+            .platforms-grid { grid-template-columns: repeat(2, 1fr); }
+            .cta-box { padding: 48px 24px; }
+            .cta-box h2 { font-size: 32px; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+            .hero-stats { flex-direction: column; gap: 16px; }
+            .gallery-slideshow { border-radius: 16px; }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; }
+        .particle { position: absolute; width: 4px; height: 4px; background: rgba(108, 60, 225, 0.4); border-radius: 50%; animation: particleFloat linear infinite; }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="navbar-logo">
+                <div class="logo-icon">❄️</div>
+                <span>Icedrive</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#platforms">Platforms</a></li>
+                <li><a href="#">Business</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button class="btn btn-ghost">Log In</button>
+                <button class="btn btn-primary">Get Started Free</button>
+            </div>
+            <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="particles" id="particles"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge"><span class="dot"></span> Next-gen cloud storage</div>
+                <h1>
+                    <span class="highlight">STUDY MATERIALS</span><br>
+                    <span class="highlight-accent">CT25TC33+4</span>
+                </h1>
+                <p class="hero-description">
+                    Experience the next generation of cloud storage. Lightning-fast speeds,
+                    zero-knowledge encryption, and an intuitive interface that makes managing
+                    your files effortless.
+                </p>
+                <div class="hero-actions">
+                    <a href="https://drive.google.com/drive/folders/1oI4s5_38_Qxdre059NSBupWwJ5MPSyJ-?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xl">💾 SAVE YOUR STUDY MATERIALS</a>
+                    <a href="https://drive.google.com/drive/folders/1LsPn1WWnK0HP2Iq09CIg-KmaDl4xFDsd?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xl">📚 TEXTBOOK (GT)</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="number">15<span>GB</span></div><div class="label">Free Storage</div></div>
+                    <div class="hero-stat"><div class="number">1M<span>+</span></div><div class="label">Active Users</div></div>
+                    <div class="hero-stat"><div class="number">99.9<span>%</span></div><div class="label">Uptime SLA</div></div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-mockup">
+                    <div class="floating-card floating-card-1"><div class="fc-icon">🔒</div><div class="fc-text">Encrypted</div><div class="fc-sub">Zero-knowledge</div></div>
+                    <div class="floating-card floating-card-2"><div class="fc-icon">⚡</div><div class="fc-text">Ultra Fast</div><div class="fc-sub">Global CDN</div></div>
+                    <div class="mockup-window">
+                        <div class="mockup-header">
+                            <div class="mockup-dot red"></div><div class="mockup-dot yellow"></div><div class="mockup-dot green"></div>
+                            <div class="mockup-title">Icedrive — My Files</div>
+                        </div>
+                        <div class="mockup-body">
+                            <div class="mockup-sidebar">
+                                <div class="mockup-nav">
+                                    <div class="mockup-nav-item active"><span class="nav-icon">📁</span> My Files</div>
+                                    <div class="mockup-nav-item"><span class="nav-icon">⭐</span> Favorites</div>
+                                    <div class="mockup-nav-item"><span class="nav-icon">🕐</span> Recent</div>
+                                    <div class="mockup-nav-item"><span class="nav-icon">🗑️</span> Trash</div>
+                                    <div class="mockup-nav-item"><span class="nav-icon">🔗</span> Shared</div>
+                                    <div class="mockup-nav-item"><span class="nav-icon">📷</span> Photos</div>
+                                </div>
+                                <div class="mockup-content">
+                                    <div class="mockup-content-header">
+                                        <div class="mockup-content-title">Documents</div>
+                                        <div class="mockup-upload-btn">+ Upload</div>
+                                    </div>
+                                    <div class="mockup-file-list">
+                                        <div class="mockup-file"><div class="file-icon purple">📄</div><div class="file-info"><div class="file-name">Project_Proposal.pdf</div><div class="file-meta">Modified 2 hours ago</div></div><div class="file-size">2.4 MB</div></div>
+                                        <div class="mockup-file"><div class="file-icon blue">🖼️</div><div class="file-info"><div class="file-name">Design_Mockup_v3.png</div><div class="file-meta">Modified yesterday</div></div><div class="file-size">8.1 MB</div></div>
+                                        <div class="mockup-file"><div class="file-icon green">📊</div><div class="file-info"><div class="file-name">Q4_Report.xlsx</div><div class="file-meta">Modified 3 days ago</div></div><div class="file-size">1.2 MB</div></div>
+                                        <div class="mockup-file"><div class="file-icon orange">🎬</div><div class="file-info"><div class="file-name">Presentation_Final.mp4</div><div class="file-meta">Modified last week</div></div><div class="file-size">156 MB</div></div>
+                                        <div class="mockup-file"><div class="file-icon pink">🎵</div><div class="file-info"><div class="file-name">Podcast_Episode_12.mp3</div><div class="file-meta">Modified 2 weeks ago</div></div><div class="file-size">45 MB</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">✨ Features</div>
+                <h2 class="section-title">Everything you need in a cloud storage</h2>
+                <p class="section-subtitle">Powerful features designed to make your file management experience seamless, secure, and incredibly fast.</p>
+            </div>
+            <div class="features-video-container fade-in">
+                <video controls autoplay muted>
+                    <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEABLD9bW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAEg9QAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAB8RF0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAEg5UAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAoAAAAHgAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEABIOVAAAD6QABAAAAAfCJbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAB1MACHa3JVxAAAAAAAR2hkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABJU08gTWVkaWEgZmlsZSBwcm9kdWNlZCBieSBHb29nbGUgSW5jLgAAAfAabWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAHv2nN0YmwAAADOc3RzZAAAAAAAAAABAAAAvmF2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAACgAHgAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAxYXZjQwFNQB7/4QAaZ01AHuiAUB7YC1AQEBQAAA+kAAOpgDxYtEgBAARo6+8gAAAAE2NvbHJuY2x4AAEAAQABAAAAABBwYXNwAAAAAQAAAAEAAAAUYnRydAAAAAAABmfTAAU0mAAAABhzdHRzAAAAAAAAAAEAACKiAAAD6QAAAfxzdHNzAAAAAAAAAHsAAAABAAAAIAAAAGsAAACfAAAA3gAAARsAAAEhAAABSQAAAYYAAAG1AAAB8AAAAkEAAAJ8AAACiwAAAs0AAAL5AAADWQAAA6QAAAPAAAAESwAABKkAAATVAAAE8AAABTEAAAVgAAAFqwAABlcAAAZlAAAGwgAABuIAAAb+AAAHLwAAB6kAAAfYAAAIYwAACI4AAAi9AAAI6QAACTsAAAmIAAAJtgAACfgAAAowAAAKXgAACqUAAAtTAAALowAAC60AAAvJAAAMKQAADHsAAAzuAAANJAAADaUAAA4KAAAOyQAAD5UAAA/vAAAQawAAEK0AABEHAAARKwAAEXAAABJCAAASvQAAE1EAABNUAAATlwAAE9MAABPvAAAUIwAAFEYAABToAAAVPwAAFYAAABXtAAAWGwAAFkAAABZ1AAAWwwAAFxMAABddAAAXngAAF+0AABg3AAAYVAAAGIEAABigAAAY3gAAGRoAABk9AAAZWgAAGYEAABnVAAAZ4wAAGhMAABqXAAAazAAAGxgAABs3AAAbWAAAG34AABv7AAAcDQAAHD0AAByLAAAdBgAAHSEAAB1CAAAdgAAAHbwAAB3rAAAeUgAAHnMAAB6YAAAe3AAAH1gAAB+bAAAf9wAAICUAACCwAAAhCgAAIdwAANeYY3R0cwAAAAAAABrxAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAkAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAAEAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAMAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAQAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAADAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAAFAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAAFAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAUAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAMAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAMAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAIAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAABQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAAGAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAAEAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAABAAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAABAAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAwAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAQAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAAEAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAQAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAUAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAIAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAABQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAMAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAABQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAwAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAABQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAABAAAA+kAAAABAAALuwAAAAIAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAgAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAQAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAMAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAgAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAADAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAIAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAfSAAAAAQAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAA+kAAAABAAALuwAAAAIAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAPpAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAAIAAAAAAAAAAQAAB9IAAAABAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAACAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAADAAAD6QAAAAEAAAfSAAAAAQAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAD6QAAAAEAAAu7AAAAAgAAAAAAAAABAAAH0gAAAAEAAAAAAAAAAQAAC7sAAAACAAAAAAAAAAEAAAu7AAAAAgAAAAAAAAABAAALuwAAAA" type="video/mp4">
+                </video>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon purple">🔒</div>
+                    <h3>Zero-Knowledge Encryption</h3>
+                    <p>Your files are encrypted before they even leave your device. Only you hold the keys to unlock your data.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon green">⚡</div>
+                    <h3>Cloud Drive</h3>
+                    <p>Interact with your files directly in your operating system without taking up any actual hard drive space.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon blue">👥</div>
+                    <h3>Easy Collaboration</h3>
+                    <p>Share files and folders with friends or colleagues with advanced control options like passwords and expiry dates.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon orange">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Access your storage seamlessly from any device, whether it's Windows, Mac, Linux, iOS, or Android.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon pink">🔄</div>
+                    <h3>File Versioning</h3>
+                    <p>Never lose track of your edits. Access previous versions of your documents anytime you need to roll back.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon cyan">📊</div>
+                    <h3>Bandwidth Control</h3>
+                    <p>Optimize your uploads and downloads with built-in speed limiters to keep your network usage balanced.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="security" id="security">
+        <div class="container">
+            <div class="security-visual">
+                <div class="security-graphic">
+                    <div class="security-circle security-circle-1"></div>
+                    <div class="security-circle security-circle-2"></div>
+                    <div class="security-circle security-circle-3"></div>
+                    <div class="security-center">🛡️</div>
+                    <div class="security-node">🔑</div>
+                    <div class="security-node">💻</div>
+                    <div class="security-node">🌐</div>
+                    <div class="security-node">📱</div>
+                    <div class="security-node">🔐</div>
+                    <div class="security-node">☁️</div>
+                </div>
+            </div>
+            <div class="security-content">
+                <div class="section-label">🔒 Privacy First</div>
+                <h2>Security is not an afterthought, it's our core mission</h2>
+                <p>We believe privacy is a fundamental human right. Unlike other providers, we cannot read your files, target you with ads, or scan your data for information.</p>
+                <div class="security-features">
+                    <div class="security-feature">
+                        <div class="sf-icon">🔑</div>
+                        <div class="sf-text">
+                            <h4>Client-Side Encryption</h4>
+                            <p>Data is encrypted on your machine using AES-256 before being synced to the cloud.</p>
+                        </div>
+                    </div>
+                    <div class="security-feature">
+                        <div class="sf-icon">🚫</div>
+                        <div class="sf-text">
+                            <h4>Zero Tracking</h4>
+                            <p>We do not use trackers, analytical cookies, or pixel tags on our storage platform.</p>
+                        </div>
+                    </div>
+                    <div class="security-feature">
+                        <div class="sf-icon">🌍</div>
+                        <div class="sf-text">
+                            <h4>GDPR Compliant</h4>
+                            <p>Your data is stored in ultra-secure European data centers strictly adhering to privacy laws.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">💰 Pricing</div>
+                <h2 class="section-title">Simple, transparent plans</h2>
+                <p class="section-subtitle">Choose the perfect tier for your storage needs. No hidden fees, cancel or upgrade anytime.</p>
+            </div>
+            <div class="pricing-toggle">
+                <span class="active" id="calc-monthly">Monthly</span>
+                <div class="toggle-switch" id="billing-toggle"></div>
+                <span id="calc-yearly">Annually</span>
+                <div class="pricing-save">Save up to 33%</div>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-plan">Free</div>
+                    <div class="pricing-storage">15 GB Storage</div>
+                    <div class="pricing-amount">
+                        <span class="currency">$</span>
+                        <span class="price">0</span>
+                        <span class="period">/mo</span>
+                    </div>
+                    <div class="pricing-annual">Forever free plan</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> 15 GB Secure Storage</li>
+                        <li><span class="check">✓</span> Standard Support</li>
+                        <li><span class="check">✓</span> Link Sharing</li>
+                        <li><span class="check">✓</span> Web App Access</li>
+                    </ul>
+                    <button class="btn btn-outline">Current Plan</button>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-plan">Pro I</div>
+                    <div class="pricing-storage">150 GB Storage</div>
+                    <div class="pricing-amount">
+                        <span class="currency">$</span>
+                        <span class="price" id="price-pro1">1.99</span>
+                        <span class="period">/mo</span>
+                    </div>
+                    <div class="pricing-annual" id="annual-pro1">Billed monthly</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> 150 GB Ultra-Fast Space</li>
+                        <li><span class="check">✓</span> Advanced Share Controls</li>
+                        <li><span class="check">✓</span> 30-Day Version History</li>
+                        <li><span class="check">✓</span> Priority Support</li>
+                    </ul>
+                    <button class="btn btn-primary">Upgrade Now</button>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-plan">Pro III</div>
+                    <div class="pricing-storage">1 TB Storage</div>
+                    <div class="pricing-amount">
+                        <span class="currency">$</span>
+                        <span class="price" id="price-pro3">4.99</span>
+                        <span class="period">/mo</span>
+                    </div>
+                    <div class="pricing-annual" id="annual-pro3">Billed monthly</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> 1 TB Cloud Storage</li>
+                        <li><span class="check">✓</span> Zero-Knowledge Encryption</li>
+                        <li><span class="check">✓</span> 180-Day Version History</li>
+                        <li><span class="check">✓</span> Dedicated Support Team</li>
+                    </ul>
+                    <button class="btn btn-primary">Upgrade Now</button>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-plan">Pro X</div>
+                    <div class="pricing-storage">5 TB Storage</div>
+                    <div class="pricing-amount">
+                        <span class="currency">$</span>
+                        <span class="price" id="price-prox">14.99</span>
+                        <span class="period">/mo</span>
+                    </div>
+                    <div class="pricing-annual" id="annual-prox">Billed monthly</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> 5 TB Heavy Storage</li>
+                        <li><span class="check">✓</span> Enterprise-Grade Security</li>
+                        <li><span class="check">✓</span> Unlimited Version History</li>
+                        <li><span class="check">✓</span> 24/7 Phone & Email Support</li>
+                    </ul>
+                    <button class="btn btn-primary">Upgrade Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="platforms" id="platforms">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">💻 Gallery</div>
+                <h2 class="section-title">Seamless platform interface</h2>
+                <p class="section-subtitle">Take a look around our premium multi-device layouts crafted for professional file workflows.</p>
+            </div>
+
+            <div class="gallery-slideshow" id="gallerySlideshow">
+                <button class="slide-arrow prev" onclick="changeSlide(-1)">❮</button>
+                <button class="slide-arrow next" onclick="changeSlide(1)">❯</button>
+                <div class="slide-counter"><span id="currentSlide">1</span> / 4</div>
+
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Icedrive Web Dashboard Layout">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80" alt="Secure Encryption Architecture Visual">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80" alt="Cloud Desktop Sync App Preview">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80" alt="Mobile Storage Access View">
+                </div>
+            </div>
+
+            <div class="slide-indicators">
+                <div class="indicator active" onclick="goToSlide(0)"></div>
+                <div class="indicator" onclick="goToSlide(1)"></div>
+                <div class="indicator" onclick="goToSlide(2)"></div>
+                <div class="indicator" onclick="goToSlide(3)"></div>
+            </div>
+
+            <div class="platforms-grid">
+                <div class="platform-card"><div class="platform-icon">🌐</div><h4>Web App</h4><p>Any Browser</p></div>
+                <div class="platform-card"><div class="platform-icon">🪟</div><h4>Windows</h4><p>Native Drive App</p></div>
+                <div class="platform-card"><div class="platform-icon">🍏</div><h4>macOS</h4><p>Mac Sync Tool</p></div>
+                <div class="platform-card"><div class="platform-icon">🐧</div><h4>Linux</h4><p>AppImage Client</p></div>
+                <div class="platform-card"><div class="platform-icon">🤖</div><h4>Mobile</h4><p>iOS & Android</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <div class="cta-box">
+                <h2>Ready to secure your data?</h2>
+                <p>Create an account today and get 15 GB of cloud storage completely free. No credit card required.</p>
+                <div class="cta-actions">
+                    <button class="btn btn-primary btn-xl">Create Free Account</button>
+                    <button class="btn btn-outline btn-xl">See Pro Features</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="navbar-logo">
+                        <div class="logo-icon">❄️</div>
+                        <span>Icedrive</span>
+                    </a>
+                    <p>Next-generation zero-knowledge secure cloud storage solution built forEveryone.</p>
+                    <div class="footer-social">
+                        <a href="#">𝕏</a><a href="#">f</a><a href="#">in</a><a href="#">yt</a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Features</a></li><li><a href="#">Cloud Drive</a></li>
+                        <li><a href="#">Plans & Pricing</a></li><li><a href="#">Security specs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Downloads</h4>
+                    <ul>
+                        <li><a href="#">Desktop App</a></li><li><a href="#">Mobile Clients</a></li>
+                        <li><a href="#">Web Portal</a></li><li><a href="#">Beta Testing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li><li><a href="#">Our Blog</a></li>
+                        <li><a href="#">Press Kit</a></li><li><a href="#">Affiliates</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li><li><a href="#">Contact Support</a></li>
+                        <li><a href="#">System Status</a></li><li><a href="#">Report Abuse</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Icedrive Ltd. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Terms of Service</a><a href="#">Privacy Policy</a><a href="#">Cookie Choice</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ====== NAVBAR SCROLL EFFECT ======
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // ====== MOBILE BURGER MENU ======
+        const burger = document.getElementById('hamburger');
+        const menu = document.querySelector('.navbar-menu');
+        burger.addEventListener('click', () => {
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            if (menu.style.display === 'flex') {
+                menu.style.position = 'absolute'; menu.style.top = '100%'; menu.style.left = '0';
+                menu.style.right = '0'; menu.style.background = '#0D0B1A'; menu.style.flexDirection = 'column';
+                menu.style.padding = '20px'; menu.style.borderBottom = '1px solid rgba(108, 60, 225, 0.2)';
+            }
+        });
+
+        // ====== DYNAMIC PARTICLE BACKGROUND ======
+        const pContainer = document.getElementById('particles');
+        if (pContainer) {
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                particle.style.animationDelay = (Math.random() * -15) + 's';
+                pContainer.appendChild(particle);
+            }
+        }
+
+        // ====== SCROLL ANIMATION (FADE IN) ======
+        const fadeElements = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        fadeElements.forEach(el => observer.observe(el));
+
+        // ====== PRICING DYNAMIC TOGGLE SWITCH ======
+        const toggle = document.getElementById('billing-toggle');
+        const mLabel = document.getElementById('calc-monthly');
+        const yLabel = document.getElementById('calc-yearly');
+        
+        // Price nodes
+        const pPro1 = document.getElementById('price-pro1');
+        const pPro3 = document.getElementById('price-pro3');
+        const pProx = document.getElementById('price-prox');
+        
+        // Annual subtitle descriptions
+        const aPro1 = document.getElementById('annual-pro1');
+        const aPro3 = document.getElementById('annual-pro3');
+        const aProx = document.getElementById('annual-prox');
+
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('active');
+                const isYearly = toggle.classList.contains('active');
+                
+                if (isYearly) {
+                    mLabel.classList.remove('active'); yLabel.classList.add('active');
+                    if (pPro1) pPro1.textContent = '1.49'; if (pPro3) pPro3.textContent = '3.49'; if (pProx) pProx.textContent = '9.99';
+                    if (aPro1) aPro1.textContent = 'Billed $17.88 annually'; if (aPro3) aPro3.textContent = 'Billed $41.88 annually'; if (aProx) aProx.textContent = 'Billed $119.88 annually';
+                } else {
+                    mLabel.classList.add('active'); yLabel.classList.remove('active');
+                    if (pPro1) pPro1.textContent = '1.99'; if (pPro3) pPro3.textContent = '4.99'; if (pProx) pProx.textContent = '14.99';
+                    if (aPro1) aPro1.textContent = 'Billed monthly'; if (aPro3) aPro3.textContent = 'Billed monthly'; if (aProx) aProx.textContent = 'Billed monthly';
+                }
+            });
+        }
+
+        // ====== PREMIUM GALLERY SLIDESHOW LOGIC ======
+        const slides = document.querySelectorAll('#gallerySlideshow .slide');
+        const indicators = document.querySelectorAll('.slide-indicators .indicator');
+        const counterEl = document.getElementById('currentSlide');
+        let currentIndex = 0;
+        let autoPlay;
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            indicators.forEach(i => i.classList.remove('active'));
+            currentIndex = (index + slides.length) % slides.length;
+            slides[currentIndex].classList.add('active');
+            indicators[currentIndex].classList.add('active');
+            counterEl.textContent = currentIndex + 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentIndex + direction);
+            resetAutoPlay();
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+            resetAutoPlay();
+        }
+
+        function resetAutoPlay() {
+            clearInterval(autoPlay);
+            autoPlay = setInterval(() => changeSlide(1), 4000);
+        }
+
+        // Tự động chuyển ảnh mỗi 4 giây
+        autoPlay = setInterval(() => changeSlide(1), 4000);
+
+        // Vuốt trên mobile
+        let touchStartX = 0;
+        const slideshow = document.getElementById('gallerySlideshow');
+        if (slideshow) {
+            slideshow.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+            slideshow.addEventListener('touchend', e => {
+                const diff = touchStartX - e.changedTouches[0].screenX;
+                if (Math.abs(diff) > 50) {
+                    changeSlide(diff > 0 ? 1 : -1);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
